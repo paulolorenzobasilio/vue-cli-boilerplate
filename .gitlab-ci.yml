@@ -1,0 +1,56 @@
+image: node:12.9.0-alpine
+
+stages:
+  - install_dependencies
+  - test
+  - build
+  - deploy
+
+install_dependencies:
+  stage: install_dependencies
+  script:
+    - echo "Installing dependencies"
+    - npm ci
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+  artifacts:
+    paths:
+      - node_modules/
+
+test:
+  stage: test
+  script:
+    - echo "Running tests"
+    - npm run test:unit
+
+build:
+  stage: build
+  script: npm run build
+  only:
+    - master
+  artifacts:
+    paths:
+      - dist/
+
+deploy_staging:
+  stage: deploy
+  script:
+    - echo "Deploy to staging server"
+  environment:
+    name: staging
+    url: https://staging.example.com
+  only:
+    - master
+
+deploy_prod:
+  stage: deploy
+  script:
+    - echo "Deploy to production server"
+  environment:
+    name: production
+    url: https://example.com
+  when: manual
+  only:
+    - master
